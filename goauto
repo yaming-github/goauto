@@ -33,7 +33,7 @@ do
 	now=$(date +"%H:%M:%S")
 	echo -e "\033[36m $now \033[0m     |     $line"
 	# if [ $(( $(date -d "$line" +%s) - $(date -d "$modtime" +%s) )) -gt 3 ]
-    # then
+	# then
 		jobs -p | xargs -r kill -9
 		ps -ax | grep "exe/"${main%.*} | grep -v grep | awk '{print $1}' | xargs -r kill -9
 		(go run $main)&
