@@ -1,0 +1,42 @@
+#! /bin/bash
+
+# yum -y update
+# yum -y install inotify-tools
+
+if [ $# -ne 2 ] 
+then 
+	echo -e "Usage:\n    goauto DIRECTORY MAIN.GO" && exit 0
+fi
+
+src=$1
+main=$2
+
+if [[ $src != *"/" ]]; then src=$src"/"; fi
+
+if ! test -d ${src}
+then 
+	echo -e "Invalid Directory\nUsage:\n    goauto DIRECTORY MAIN.GO" && exit 0
+fi
+cd $src
+
+if [ "${main##*.}"x != "go"x ] || ! test -e ${main}
+then
+	echo -e "Invalid main.go\nUsage:\n    goauto DIRECTORY MAIN.GO" && exit 0
+fi
+
+# TODO timestamp check
+# modtime="1998-07-26 10:00:00"
+
+(go run $main)&
+inotifywait -mrq -e modify,create,delete --timefmt "%F %T" --format "%e %w %f" --exclude "^(.+(\.sw[px]|~))|4913$" . | while read line
+do
+	now=$(date +"%H:%M:%S")
+	echo -e "\033[36m $now \033[0m     |     $line"
+	# if [ $(( $(date -d "$line" +%s) - $(date -d "$modtime" +%s) )) -gt 3 ]
+    # then
+		jobs -p | xargs -r kill -9
+		ps -ax | grep "exe/"${main%.*} | grep -v grep | awk '{print $1}' | xargs -r kill -9
+		(go run $main)&
+	# fi
+	# modtime=$line
+done
