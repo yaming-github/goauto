@@ -11,8 +11,6 @@ fi
 src=$1
 main=$2
 
-if [[ $src != *"/" ]]; then src=$src"/"; fi
-
 if ! test -d ${src}
 then 
 	echo -e "Invalid Directory\nUsage:\n    goauto DIRECTORY MAIN.GO" && exit 0
